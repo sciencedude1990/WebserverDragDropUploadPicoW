@@ -1,0 +1,74 @@
+<html>
+<head>
+<title>Drag Drop Test</title>
+<style>
+#drop_zone {
+  border: 5px solid blue;
+  width: 200px;
+  height: 100px;
+}
+</style>
+</head>
+<body>
+<script>
+
+function dragOverHandler(ev) {
+  console.log('File(s) in drop zone');
+
+  // Prevent default behavior (Prevent file from being opened)
+  ev.preventDefault();
+}
+
+function dropHandler(ev) {
+  console.log('File(s) dropped');
+
+  // Prevent default behavior (Prevent file from being opened)
+  ev.preventDefault();
+
+  if (ev.dataTransfer.items) {
+    var formData = new FormData();  
+
+    console.log('items');
+    // Use DataTransferItemList interface to access the file(s)
+    [...ev.dataTransfer.items].forEach((item, i) => {
+      // If dropped items aren't files, reject them
+      if (item.kind === 'file') {
+        const file = item.getAsFile();
+        console.log(`… file[${i}].name = ${file.name}`);
+		formData.append('file', file);
+      }
+    });
+	
+  // Send the files using "POST"
+	var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/upload');
+    xhr.onload = function () {
+       if (xhr.status === 200) {
+          console.log('all done: ' + xhr.status);
+       } else {
+          console.log('Something went terribly wrong...');
+       }
+    };
+
+    // Actually send the files
+    xhr.send(formData);
+	
+  } else {
+    console.log('not items');
+    // Use DataTransfer interface to access the file(s)
+    [...ev.dataTransfer.files].forEach((file, i) => {
+      console.log(`… file[${i}].name = ${file.name}`);
+    });
+  }
+}
+
+</script>
+
+Welcome
+
+<div id="drop_zone" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
+  <p>Drag one or more files to this <i>drop zone</i>.</p>
+</div>
+
+</body>
+</html>
